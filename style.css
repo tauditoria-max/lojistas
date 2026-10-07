@@ -1,0 +1,339 @@
+/* =========================================================
+   Paleta:
+   - Fundo: branco (#ffffff)
+   - Detalhes: #1f4e78 (azul escuro) e #2f75b5 (azul médio)
+   - Fontes: #808080 (cinza)
+   ========================================================= */
+
+* { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #808080;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* ==================== Tela de Login ==================== */
+.tela-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.card-login {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-top: 6px solid #1f4e78;
+  border-radius: 12px;
+  padding: 40px 30px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 10px 30px rgba(31, 78, 120, 0.15);
+  text-align: center;
+}
+
+.card-login h1 {
+  color: #1f4e78;
+  margin: 0 0 6px 0;
+  font-size: 28px;
+}
+
+.subtitulo {
+  color: #808080;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+.card-login form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.card-login label {
+  color: #808080;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.card-login input {
+  padding: 12px;
+  border: 1px solid #d5d5d5;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1f4e78;
+  outline: none;
+  transition: 0.2s;
+}
+
+.card-login input:focus {
+  border-color: #2f75b5;
+  box-shadow: 0 0 0 3px rgba(47, 117, 181, 0.15);
+}
+
+.card-login button {
+  margin-top: 12px;
+  padding: 12px;
+  background: #1f4e78;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.card-login button:hover {
+  background: #2f75b5;
+}
+
+#msgLogin {
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #c0392b;
+  min-height: 18px;
+}
+
+/* ==================== App principal ==================== */
+.container {
+  max-width: 1100px;
+  margin: auto;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 8px 24px rgba(31, 78, 120, 0.08);
+}
+
+.topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid #1f4e78;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.topo h1 {
+  color: #1f4e78;
+  margin: 0;
+  font-size: 24px;
+}
+
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #808080;
+  font-size: 14px;
+}
+
+#btnSair {
+  background: #ffffff;
+  border: 1px solid #2f75b5;
+  color: #2f75b5;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+#btnSair:hover {
+  background: #2f75b5;
+  color: #ffffff;
+}
+
+/* ==================== Filtros ==================== */
+.filtros {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  color: #808080;
+  flex-wrap: wrap;
+}
+
+.filtros select,
+.filtros input[type="text"] {
+  padding: 10px 12px;
+  border: 1px solid #d5d5d5;
+  border-radius: 8px;
+  color: #1f4e78;
+  font-weight: 600;
+  outline: none;
+  font-size: 14px;
+}
+
+.filtros input[type="text"] {
+  flex: 1;
+  min-width: 220px;
+  font-weight: 400;
+}
+
+.filtros select:focus,
+.filtros input[type="text"]:focus {
+  border-color: #2f75b5;
+  box-shadow: 0 0 0 3px rgba(47, 117, 181, 0.15);
+}
+
+h2 {
+  color: #1f4e78;
+  font-size: 18px;
+  border-bottom: 2px solid #2f75b5;
+  padding-bottom: 8px;
+  margin-top: 30px;
+}
+
+/* ==================== Tabela ==================== */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+table th, table td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  color: #808080;
+}
+
+table th {
+  background: #f5f8fb;
+  color: #1f4e78;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+}
+
+table tr:hover {
+  background: #fafcff;
+}
+
+table input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d5d5d5;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #1f4e78;
+  outline: none;
+  transition: 0.2s;
+}
+
+table input:focus {
+  border-color: #2f75b5;
+  box-shadow: 0 0 0 3px rgba(47, 117, 181, 0.15);
+}
+
+.btn-salvar {
+  background: #1f4e78;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-salvar:hover {
+  background: #2f75b5;
+}
+
+.status-ok {
+  color: #27ae60;
+  font-weight: 700;
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+/* ==================== Botões inferiores ==================== */
+.acoes {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.acoes button {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  min-width: 220px;
+}
+
+#btnExportar {
+  background: #1f4e78;
+  color: #ffffff;
+}
+
+#btnExportar:hover {
+  background: #2f75b5;
+}
+
+#btnRestaurar {
+  background: #ffffff;
+  color: #2f75b5;
+  border: 1px solid #2f75b5;
+}
+
+#btnRestaurar:hover {
+  background: #2f75b5;
+  color: #ffffff;
+}
+
+/* ==================== Mensagens ==================== */
+#mensagem {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  display: none;
+}
+
+#mensagem.sucesso {
+  background: #eaf4fb;
+  color: #1f4e78;
+  border-left: 4px solid #2f75b5;
+  display: block;
+}
+
+#mensagem.erro {
+  background: #fdecea;
+  color: #c0392b;
+  border-left: 4px solid #c0392b;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .container { padding: 20px 16px; }
+  .topo h1 { font-size: 18px; }
+  table { font-size: 12px; }
+  table th, table td { padding: 8px 6px; }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro de Lojas - Shopping</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- ==================== TELA DE LOGIN ==================== -->
+  <div id="telaLogin" class="tela-login">
+    <div class="card-login">
+      <h1>🏬 Shopping</h1>
+      <p class="subtitulo">Acesso restrito</p>
+
+      <form id="formLogin">
+        <label>E-mail</label>
+        <input type="email" id="loginEmail" placeholder="seu@email.com" required autocomplete="username" />
+
+        <label>Senha</label>
+        <input type="password" id="loginSenha" placeholder="••••••••" required autocomplete="current-password" />
+
+        <button type="submit">Entrar</button>
+      </form>
+
+      <div id="msgLogin"></div>
+    </div>
+  </div>
+
+  <!-- ==================== APLICAÇÃO ==================== -->
+  <div id="app" class="container" style="display:none;">
+    <header class="topo">
+      <h1>🏬 Cadastro de Lojas do Shopping</h1>
+      <div class="usuario">
+        <span id="usuarioLogado"></span>
+        <button id="btnSair">Sair</button>
+      </div>
+    </header>
+
+    <div class="filtros">
+      <label for="filtroPiso">Filtrar por Piso:</label>
+      <select id="filtroPiso">
+        <option value="">Todos</option>
+        <option value="L1">L1</option>
+        <option value="L2">L2</option>
+        <option value="L3">L3</option>
+        <option value="L4">L4</option>
+      </select>
+
+      <input type="text" id="filtroBusca" placeholder="🔎 Buscar loja ou LUC..." />
+    </div>
+
+    <h2>📋 Lojas Cadastradas</h2>
+    <table id="tabelaLojas">
+      <thead>
+        <tr>
+          <th>Piso</th>
+          <th>LUC</th>
+          <th>Loja</th>
+          <th>E-mail</th>
+          <th>Telefone</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="acoes">
+      <button id="btnExportar">📊 Exportar Excel e Enviar por E-mail</button>
+      <button id="btnRestaurar">🔄 Restaurar Lista Padrão</button>
+    </div>
+
+    <div id="mensagem"></div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
