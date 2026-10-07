@@ -24,10 +24,10 @@ const filtroPiso = document.getElementById('filtroPiso');
 const filtroBusca = document.getElementById('filtroBusca');
 const msg = document.getElementById('mensagem');
 
-// Cache local da lista de lojas
+// Cache local
 let todasAsLojas = [];
 
-// ==================== Login (Firebase Authentication) ====================
+// ==================== Login ====================
 formLogin.addEventListener('submit', async (e) => {
   e.preventDefault();
   msgLogin.textContent = '';
@@ -73,7 +73,7 @@ function mostrarMensagem(texto, tipo = 'sucesso') {
   }, 5000);
 }
 
-// ==================== Cadastro inicial de lojas ====================
+// ==================== Cadastro inicial ====================
 async function garantirLojasNoFirestore() {
   console.log('🔍 Verificando lojas existentes no Firestore...');
 
@@ -108,6 +108,7 @@ async function garantirLojasNoFirestore() {
         piso: loja.piso,
         luc: loja.luc,
         loja: loja.loja,
+        nome: '',
         email: '',
         telefone: '',
         criadoEm: new Date().toISOString()
@@ -128,7 +129,7 @@ async function iniciarLista() {
   await carregarLojas();
 }
 
-// ==================== Carregar lojas (SEM índice no Firestore) ====================
+// ==================== Carregar lojas ====================
 async function carregarLojas() {
   try {
     const snap = await getDocs(collection(db, 'lojas'));
@@ -139,7 +140,6 @@ async function carregarLojas() {
       todasAsLojas.push({ id: docSnap.id, ...docSnap.data() });
     });
 
-    // Ordena localmente: primeiro por piso, depois por LUC (com números)
     todasAsLojas.sort((a, b) => {
       if (a.piso !== b.piso) return a.piso.localeCompare(b.piso);
       return (a.luc || '').localeCompare(b.luc || '', undefined, { numeric: true });
@@ -162,7 +162,7 @@ function renderizarTabela() {
   const filtradas = todasAsLojas.filter(d => {
     if (pisoSelecionado && d.piso !== pisoSelecionado) return false;
     if (termoBusca) {
-      const alvo = `${d.loja} ${d.luc}`.toLowerCase();
+      const alvo = `${d.loja} ${d.luc} ${d.nome || ''}`.toLowerCase();
       if (!alvo.includes(termoBusca)) return false;
     }
     return true;
@@ -180,19 +180,26 @@ function renderizarTabela() {
   filtradas.forEach(d => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><strong style="color:#1f4e78;">${d.piso}</strong></td>
-      <td><strong>${d.luc}</strong></td>
-      <td>${d.loja}</td>
-      <td>
+      <td data-label="Piso / LUC / Loja">
+        <strong style="color:#1f4e78;">${d.piso} · LUC ${d.luc}</strong><br>
+        <span style="font-size:15px;">${d.loja}</span>
+      </td>
+      <td data-label="Nome do Responsável">
+        <input type="text" data-campo="nome" value="${d.nome || ''}"
+               placeholder="Nome completo" autocomplete="name" />
+      </td>
+      <td data-label="E-mail">
         <input type="email" data-campo="email" value="${d.email || ''}"
-               placeholder="email@loja.com" />
+               placeholder="email@loja.com" autocomplete="email"
+               inputmode="email" />
       </td>
-      <td>
+      <td data-label="Telefone">
         <input type="tel" data-campo="telefone" value="${d.telefone || ''}"
-               placeholder="(11) 99999-9999" />
+               placeholder="(81) 99999-9999" autocomplete="tel"
+               inputmode="tel" />
       </td>
-      <td>
-        <button class="btn-salvar" data-id="${d.id}">Salvar</button>
+      <td data-label="Ação">
+        <button class="btn-salvar" data-id="${d.id}">💾 Salvar</button>
         <span class="status-ok" data-status="${d.id}"></span>
       </td>
     `;
@@ -204,14 +211,15 @@ function renderizarTabela() {
     btn.addEventListener('click', async () => {
       const id = btn.dataset.id;
       const tr = btn.closest('tr');
+      const nome = tr.querySelector('[data-campo="nome"]').value.trim();
       const email = tr.querySelector('[data-campo="email"]').value.trim();
       const telefone = tr.querySelector('[data-campo="telefone"]').value.trim();
 
       try {
-        await setDoc(doc(db, 'lojas', id), { email, telefone }, { merge: true });
+        await setDoc(doc(db, 'lojas', id), { nome, email, telefone }, { merge: true });
 
         const item = todasAsLojas.find(x => x.id === id);
-        if (item) { item.email = email; item.telefone = telefone; }
+        if (item) { item.nome = nome; item.email = email; item.telefone = telefone; }
 
         const status = document.querySelector(`[data-status="${id}"]`);
         status.textContent = '✓ salvo';
@@ -243,6 +251,7 @@ document.getElementById('btnExportar').addEventListener('click', async () => {
         Piso: v.piso,
         LUC: v.luc,
         Loja: v.loja,
+        Nome: v.nome || '(não informado)',
         Email: v.email || '(não informado)',
         Telefone: v.telefone || '(não informado)'
       });

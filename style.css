@@ -5,14 +5,19 @@
    - Fontes: #808080 (cinza)
    ========================================================= */
 
-* { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
 
 body {
   margin: 0;
   background: #ffffff;
   color: #808080;
   min-height: 100vh;
-  padding: 20px;
+  padding: 12px;
+  font-size: 16px;
 }
 
 /* ==================== Tela de Login ==================== */
@@ -21,7 +26,7 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 20px;
+  padding: 16px;
 }
 
 .card-login {
@@ -29,9 +34,9 @@ body {
   border: 1px solid #e0e0e0;
   border-top: 6px solid #1f4e78;
   border-radius: 12px;
-  padding: 40px 30px;
+  padding: 32px 24px;
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   box-shadow: 0 10px 30px rgba(31, 78, 120, 0.15);
   text-align: center;
 }
@@ -39,33 +44,33 @@ body {
 .card-login h1 {
   color: #1f4e78;
   margin: 0 0 6px 0;
-  font-size: 28px;
+  font-size: 26px;
 }
 
 .subtitulo {
   color: #808080;
   font-size: 14px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .card-login form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   text-align: left;
 }
 
 .card-login label {
   color: #808080;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .card-login input {
-  padding: 12px;
+  padding: 14px;
   border: 1px solid #d5d5d5;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 16px; /* evita zoom automático no iOS */
   color: #1f4e78;
   outline: none;
   transition: 0.2s;
@@ -77,13 +82,13 @@ body {
 }
 
 .card-login button {
-  margin-top: 12px;
-  padding: 12px;
+  margin-top: 8px;
+  padding: 16px;
   background: #1f4e78;
   color: #ffffff;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 10px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: 0.2s;
@@ -95,10 +100,10 @@ body {
 
 #msgLogin {
   margin-top: 16px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #c0392b;
-  min-height: 18px;
+  min-height: 20px;
 }
 
 /* ==================== App principal ==================== */
@@ -106,49 +111,58 @@ body {
   max-width: 1100px;
   margin: auto;
   background: #ffffff;
-  border-radius: 16px;
-  padding: 30px;
+  border-radius: 12px;
+  padding: 16px;
   border: 1px solid #eaeaea;
-  box-shadow: 0 8px 24px rgba(31, 78, 120, 0.08);
+  box-shadow: 0 6px 20px rgba(31, 78, 120, 0.08);
 }
 
 .topo {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
   border-bottom: 3px solid #1f4e78;
-  padding-bottom: 16px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .topo h1 {
   color: #1f4e78;
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
+  line-height: 1.3;
 }
 
 .usuario {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 10px;
   color: #808080;
-  font-size: 14px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.usuario span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
 }
 
 #btnSair {
   background: #ffffff;
   border: 1px solid #2f75b5;
   color: #2f75b5;
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 14px;
   transition: 0.2s;
 }
 
-#btnSair:hover {
+#btnSair:active {
   background: #2f75b5;
   color: #ffffff;
 }
@@ -156,27 +170,31 @@ body {
 /* ==================== Filtros ==================== */
 .filtros {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.filtros label {
+  font-size: 14px;
+  font-weight: 600;
   color: #808080;
-  flex-wrap: wrap;
 }
 
 .filtros select,
 .filtros input[type="text"] {
-  padding: 10px 12px;
+  width: 100%;
+  padding: 12px 14px;
   border: 1px solid #d5d5d5;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #1f4e78;
   font-weight: 600;
   outline: none;
-  font-size: 14px;
+  font-size: 16px;
+  background: #ffffff;
 }
 
 .filtros input[type="text"] {
-  flex: 1;
-  min-width: 220px;
   font-weight: 400;
 }
 
@@ -188,55 +206,92 @@ body {
 
 h2 {
   color: #1f4e78;
-  font-size: 18px;
+  font-size: 16px;
   border-bottom: 2px solid #2f75b5;
   padding-bottom: 8px;
-  margin-top: 30px;
+  margin-top: 20px;
+  margin-bottom: 12px;
 }
 
-/* ==================== Tabela ==================== */
-.table-wrapper {
-  overflow-x: auto;
+/* =========================================================
+   TABELA — vira CARDS no celular, tabela no desktop
+   ========================================================= */
+
+/* Esconde o cabeçalho da tabela no mobile */
+table thead {
+  display: none;
+}
+
+table, tbody, tr, td {
+  display: block;
+  width: 100%;
 }
 
 table {
-  width: 100%;
   border-collapse: collapse;
   margin-top: 8px;
-  font-size: 14px;
+  font-size: 15px;
 }
 
-table th, table td {
-  padding: 12px 10px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-  color: #808080;
-}
-
-table th {
-  background: #f5f8fb;
-  color: #1f4e78;
-  font-weight: 700;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: sticky;
-  top: 0;
+/* Cada linha vira um "cartão" */
+table tr {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #1f4e78;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(31, 78, 120, 0.06);
 }
 
 table tr:hover {
   background: #fafcff;
 }
 
+table td {
+  padding: 8px 0;
+  border: none;
+  color: #808080;
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Rótulo automático em cada célula (via data-label) */
+table td::before {
+  content: attr(data-label);
+  font-size: 11px;
+  font-weight: 700;
+  color: #1f4e78;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* A primeira célula (piso + loja) ganha destaque */
+table td:first-child {
+  color: #1f4e78;
+  font-size: 18px;
+  font-weight: 700;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 6px;
+}
+
+table td:first-child::before {
+  color: #2f75b5;
+}
+
 table input {
   width: 100%;
-  padding: 8px 10px;
+  padding: 12px 14px;
   border: 1px solid #d5d5d5;
-  border-radius: 6px;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 16px; /* evita zoom no iOS */
   color: #1f4e78;
   outline: none;
   transition: 0.2s;
+  background: #ffffff;
 }
 
 table input:focus {
@@ -248,43 +303,46 @@ table input:focus {
   background: #1f4e78;
   color: #ffffff;
   border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
+  padding: 12px 18px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   transition: 0.2s;
+  width: 100%;
+  margin-top: 4px;
 }
 
-.btn-salvar:hover {
+.btn-salvar:active {
   background: #2f75b5;
 }
 
 .status-ok {
+  display: block;
   color: #27ae60;
   font-weight: 700;
-  font-size: 12px;
-  margin-left: 6px;
+  font-size: 13px;
+  margin-top: 6px;
+  text-align: center;
 }
 
 /* ==================== Botões inferiores ==================== */
 .acoes {
   display: flex;
-  gap: 12px;
-  margin-top: 30px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .acoes button {
-  flex: 1;
-  padding: 14px;
+  width: 100%;
+  padding: 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 10px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: 0.2s;
-  min-width: 220px;
 }
 
 #btnExportar {
@@ -292,7 +350,7 @@ table input:focus {
   color: #ffffff;
 }
 
-#btnExportar:hover {
+#btnExportar:active {
   background: #2f75b5;
 }
 
@@ -302,19 +360,20 @@ table input:focus {
   border: 1px solid #2f75b5;
 }
 
-#btnRestaurar:hover {
+#btnRestaurar:active {
   background: #2f75b5;
   color: #ffffff;
 }
 
 /* ==================== Mensagens ==================== */
 #mensagem {
-  margin-top: 20px;
+  margin-top: 16px;
   padding: 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   text-align: center;
   font-weight: 600;
   display: none;
+  font-size: 14px;
 }
 
 #mensagem.sucesso {
@@ -331,9 +390,147 @@ table input:focus {
   display: block;
 }
 
-@media (max-width: 640px) {
-  .container { padding: 20px 16px; }
-  .topo h1 { font-size: 18px; }
-  table { font-size: 12px; }
-  table th, table td { padding: 8px 6px; }
+/* =========================================================
+   DESKTOP — volta a ser tabela normal (a partir de 768px)
+   ========================================================= */
+@media (min-width: 768px) {
+  body {
+    padding: 20px;
+    font-size: 14px;
+  }
+
+  .container {
+    padding: 30px;
+    border-radius: 16px;
+  }
+
+  .topo {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .topo h1 {
+    font-size: 24px;
+  }
+
+  .usuario span {
+    max-width: none;
+  }
+
+  .filtros {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .filtros label {
+    white-space: nowrap;
+  }
+
+  .filtros select {
+    width: auto;
+    min-width: 120px;
+  }
+
+  .filtros input[type="text"] {
+    flex: 1;
+    width: auto;
+  }
+
+  h2 {
+    font-size: 18px;
+    margin-top: 30px;
+  }
+
+  /* Volta ao formato de tabela */
+  table {
+    display: table;
+    font-size: 14px;
+  }
+
+  table thead {
+    display: table-header-group;
+  }
+
+  table tbody {
+    display: table-row-group;
+  }
+
+  table tr {
+    display: table-row;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  table tr:hover {
+    background: #fafcff;
+  }
+
+  table th, table td {
+    display: table-cell;
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    color: #808080;
+    font-size: 14px;
+  }
+
+  table th {
+    background: #f5f8fb;
+    color: #1f4e78;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  table td::before {
+    content: none;
+  }
+
+  table td:first-child {
+    color: #1f4e78;
+    font-size: 14px;
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+    margin-bottom: 0;
+  }
+
+  table input {
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  .btn-salvar {
+    width: auto;
+    padding: 8px 14px;
+    font-size: 12px;
+    margin-top: 0;
+  }
+
+  .status-ok {
+    display: inline;
+    margin-left: 6px;
+    margin-top: 0;
+    text-align: left;
+  }
+
+  .acoes {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .acoes button {
+    flex: 1;
+    padding: 14px;
+    font-size: 15px;
+    min-width: 220px;
+  }
 }
