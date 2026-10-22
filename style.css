@@ -180,11 +180,22 @@ table tbody tr:last-child td { border-bottom: none; }
 .loja-sub strong { color: #2f75b5; }
 
 /* Inputs na Tabela */
-table input {
+table input, table select {
   width: 100%; padding: 10px 14px; border: 1px solid #d5d5d5; border-radius: 8px;
   font-size: 14px; color: #333; outline: none; background: #fafbfc; transition: 0.2s;
 }
-table input:focus { border-color: #2f75b5; background: #fff; box-shadow: 0 0 0 3px rgba(47, 117, 181, 0.15); }
+table input:focus, table select:focus { border-color: #2f75b5; background: #fff; box-shadow: 0 0 0 3px rgba(47, 117, 181, 0.15); }
+
+/* Dropdown de Função */
+table select.select-funcao {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f4e78' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+  cursor: pointer;
+}
 
 .btn-salvar {
   background: #1f4e78; color: #fff; border: none; padding: 10px 16px; border-radius: 8px;
@@ -195,11 +206,12 @@ table input:focus { border-color: #2f75b5; background: #fff; box-shadow: 0 0 0 3
 
 /* Larguras Desktop */
 @media (min-width: 900px) {
-  table th:nth-child(1) { width: 25%; }
-  table th:nth-child(2) { width: 25%; }
-  table th:nth-child(3) { width: 22%; }
-  table th:nth-child(4) { width: 18%; }
-  table th:nth-child(5) { width: 10%; }
+  table th:nth-child(1) { width: 22%; }
+  table th:nth-child(2) { width: 20%; }
+  table th:nth-child(3) { width: 16%; }
+  table th:nth-child(4) { width: 20%; }
+  table th:nth-child(5) { width: 15%; }
+  table th:nth-child(6) { width: 7%; }
 }
 
 /* ==================== MOBILE (CARDS) ==================== */

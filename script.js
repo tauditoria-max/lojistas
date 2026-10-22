@@ -1,7 +1,6 @@
 import { firebaseConfig } from './firebase-config.js';
 import { LOJAS_FIXAS } from './lojas.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-// 👇 Importe as funções de cache persistente
 import {
   getFirestore, collection, addDoc, getDocs, setDoc, deleteDoc, doc,
   initializeFirestore, persistentLocalCache, persistentSingleTabManager
@@ -13,13 +12,12 @@ import {
 // ==================== Inicialização ====================
 const app = initializeApp(firebaseConfig);
 
-// 👇 ATIVAÇÃO DA PERSISTÊNCIA OFFLINE (Nova API v9+)
+// Ativação da Persistência Offline
 const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
     tabManager: persistentSingleTabManager()
   })
 });
-
 const auth = getAuth(app);
 
 // ==================== Elementos ====================
@@ -97,7 +95,7 @@ async function garantirLojasNoFirestore() {
     try {
       await addDoc(collection(db, 'lojas'), {
         piso: loja.piso, luc: loja.luc, loja: loja.loja,
-        nome: '', email: '', telefone: '', criadoEm: new Date().toISOString()
+        nome: '', funcao: '', email: '', telefone: '', criadoEm: new Date().toISOString()
       });
     } catch (err) { console.error('Erro ao cadastrar:', loja.loja); }
   }
@@ -156,11 +154,16 @@ function renderizarTabela() {
   });
 
   if (filtradas.length === 0) {
-    tabela.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#808080;">Nenhuma loja encontrada.</td></tr>`;
+    tabela.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:#808080;">Nenhuma loja encontrada.</td></tr>`;
     return;
   }
 
   filtradas.forEach(d => {
+    const funcoes = ['Lojista', 'Supervisor', 'Gerente', 'Vendedor Líder'];
+    const opcoesFuncao = funcoes.map(f => 
+      `<option value="${f}" ${d.funcao === f ? 'selected' : ''}>${f}</option>`
+    ).join('');
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td data-label="Loja">
@@ -169,6 +172,12 @@ function renderizarTabela() {
       </td>
       <td data-label="Nome">
         <input type="text" data-campo="nome" value="${d.nome || ''}" placeholder="Nome do responsável" autocomplete="name" />
+      </td>
+      <td data-label="Função">
+        <select data-campo="funcao" class="select-funcao">
+          <option value="">Selecione...</option>
+          ${opcoesFuncao}
+        </select>
       </td>
       <td data-label="E-mail">
         <input type="email" data-campo="email" value="${d.email || ''}" placeholder="email@loja.com" autocomplete="email" inputmode="email" />
@@ -184,38 +193,35 @@ function renderizarTabela() {
     tabela.appendChild(tr);
   });
 
-  // Adiciona os eventos de salvar e a máscara
   document.querySelectorAll('.btn-salvar').forEach(btn => {
     btn.addEventListener('click', async () => {
-  const id = btn.dataset.id;
-  const tr = btn.closest('tr');
-  const nome = tr.querySelector('[data-campo="nome"]').value.trim();
-  const email = tr.querySelector('[data-campo="email"]').value.trim();
-  const telefone = tr.querySelector('[data-campo="telefone"]').value.trim();
+      const id = btn.dataset.id;
+      const tr = btn.closest('tr');
+      const nome = tr.querySelector('[data-campo="nome"]').value.trim();
+      const funcao = tr.querySelector('[data-campo="funcao"]').value;
+      const email = tr.querySelector('[data-campo="email"]').value.trim();
+      const telefone = tr.querySelector('[data-campo="telefone"]').value.trim();
 
-  // 1. Atualizar primeiro o cache local e a interface (não esperar pelo await)
-  const item = todasAsLojas.find(x => x.id === id);
-  if (item) { item.nome = nome; item.email = email; item.telefone = telefone; }
-  atualizarDashboard();
-  
-  const status = document.querySelector(`[data-status="${id}"]`);
-  status.textContent = '✓ salvo';
-  setTimeout(() => { status.textContent = ''; }, 2500);
+      // 1. Atualiza interface IMEDIATAMENTE (Feedback visual offline)
+      const item = todasAsLojas.find(x => x.id === id);
+      if (item) { item.nome = nome; item.funcao = funcao; item.email = email; item.telefone = telefone; }
+      atualizarDashboard();
 
-  // 2. Disparar a escrita (sem await, ou com tratamento de erro separado)
-  try {
-    await setDoc(doc(db, 'lojas', id), { nome, email, telefone }, { merge: true });
-    // Se chegou aqui, significa que o servidor confirmou a escrita (quando online)
-    console.log('Servidor confirmou a escrita:', id);
-  } catch (err) {
-    // Erros offline geralmente não entram aqui; erros de permissão do servidor entram
-    console.error('Erro ao salvar:', err);
-    alert('Falha ao salvar no servidor: ' + err.message);
-  }
-});
+      const status = document.querySelector(`[data-status="${id}"]`);
+      status.textContent = '✓ salvo';
+      setTimeout(() => { status.textContent = ''; }, 2500);
+
+      // 2. Envia para o Firebase em segundo plano
+      try {
+        await setDoc(doc(db, 'lojas', id), { nome, funcao, email, telefone }, { merge: true });
+        console.log('Servidor confirmou a escrita:', id);
+      } catch (err) {
+        console.error('Erro ao salvar:', err);
+      }
+    });
   });
 
-  // Aplica a máscara de telefone em todos os campos
+  // Aplica a máscara
   document.querySelectorAll('input[data-campo="telefone"]').forEach(input => {
     aplicarMascaraTelefone(input);
   });
@@ -227,8 +233,7 @@ filtroBusca.addEventListener('input', renderizarTabela);
 // ==================== Máscara de Telefone ====================
 function aplicarMascaraTelefone(input) {
   input.addEventListener('input', (e) => {
-    let valor = e.target.value.replace(/\D/g, ''); // Remove tudo que não é número
-    
+    let valor = e.target.value.replace(/\D/g, '');
     if (valor.length > 11) valor = valor.slice(0, 11);
 
     if (valor.length > 6) {
@@ -238,7 +243,6 @@ function aplicarMascaraTelefone(input) {
     } else if (valor.length > 0) {
       valor = valor.replace(/^(\d*)/, '($1');
     }
-    
     e.target.value = valor;
   });
 }
@@ -255,12 +259,13 @@ document.getElementById('btnExportar').addEventListener('click', async () => {
     LUC: v.luc,
     Loja: v.loja,
     Nome: v.nome || '(não informado)',
+    Funcao: v.funcao || '(não informado)',
     Email: v.email || '(não informado)',
     Telefone: v.telefone || '(não informado)'
   }));
 
   const ws = XLSX.utils.json_to_sheet(dados);
-  ws['!cols'] = [{ wch: 8 }, { wch: 15 }, { wch: 35 }, { wch: 30 }, { wch: 30 }, { wch: 20 }];
+  ws['!cols'] = [{ wch: 8 }, { wch: 15 }, { wch: 35 }, { wch: 30 }, { wch: 18 }, { wch: 30 }, { wch: 20 }];
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Lojas');
