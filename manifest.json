@@ -1,0 +1,21 @@
+{
+  "name": "Cadastro de Lojas - Shopping",
+  "short_name": "Lojas",
+  "description": "Aplicativo para captação de dados de lojas do shopping",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f4e78",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/1f4e78/ffffff?text=Lojas",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/1f4e78/ffffff?text=Lojas",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,8 +1,10 @@
-import { firebaseConfig, APPS_SCRIPT_URL } from './firebase-config.js';
+import { firebaseConfig } from './firebase-config.js';
 import { LOJAS_FIXAS } from './lojas.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+// 👇 Importe as funções de cache persistente
 import {
-  getFirestore, collection, addDoc, getDocs, setDoc, deleteDoc, doc
+  getFirestore, collection, addDoc, getDocs, setDoc, deleteDoc, doc,
+  initializeFirestore, persistentLocalCache, persistentSingleTabManager
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
@@ -10,7 +12,14 @@ import {
 
 // ==================== Inicialização ====================
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+
+// 👇 ATIVAÇÃO DA PERSISTÊNCIA OFFLINE (Nova API v9+)
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentSingleTabManager()
+  })
+});
+
 const auth = getAuth(app);
 
 // ==================== Elementos ====================
@@ -24,59 +33,50 @@ const filtroPiso = document.getElementById('filtroPiso');
 const filtroBusca = document.getElementById('filtroBusca');
 const msg = document.getElementById('mensagem');
 
-// Cache local
+// Elementos do Dashboard
+const cardTotal = document.getElementById('cardTotalLojas');
+const cardPendentes = document.getElementById('cardPendentes');
+const cardPreenchidos = document.getElementById('cardPreenchidos');
+
 let todasAsLojas = [];
 
 // ==================== Login ====================
 formLogin.addEventListener('submit', async (e) => {
   e.preventDefault();
   msgLogin.textContent = '';
-
   const email = document.getElementById('loginEmail').value.trim();
   const senha = document.getElementById('loginSenha').value;
 
   try {
     await signInWithEmailAndPassword(auth, email, senha);
   } catch (err) {
-    console.error(err);
     msgLogin.textContent = '❌ E-mail ou senha inválidos.';
   }
 });
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    iniciarApp(user.email);
+    telaLogin.style.display = 'none';
+    appDiv.style.display = 'block';
+    usuarioLogado.textContent = user.email;
+    iniciarLista();
   } else {
     telaLogin.style.display = 'flex';
     appDiv.style.display = 'none';
   }
 });
 
-document.getElementById('btnSair').addEventListener('click', () => {
-  signOut(auth);
-});
-
-function iniciarApp(email) {
-  telaLogin.style.display = 'none';
-  appDiv.style.display = 'block';
-  usuarioLogado.textContent = '👤 ' + email;
-  iniciarLista();
-}
+document.getElementById('btnSair').addEventListener('click', () => signOut(auth));
 
 // ==================== Mensagens ====================
 function mostrarMensagem(texto, tipo = 'sucesso') {
   msg.textContent = texto;
   msg.className = tipo;
-  setTimeout(() => {
-    msg.className = '';
-    msg.textContent = '';
-  }, 5000);
+  setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 5000);
 }
 
-// ==================== Cadastro inicial ====================
+// ==================== Cadastro Inicial ====================
 async function garantirLojasNoFirestore() {
-  console.log('🔍 Verificando lojas existentes no Firestore...');
-
   let existentes = new Set();
   try {
     const snap = await getDocs(collection(db, 'lojas'));
@@ -84,44 +84,23 @@ async function garantirLojasNoFirestore() {
       const v = d.data();
       existentes.add(`${v.piso}|${v.luc}|${v.loja}`);
     });
-    console.log(`📦 Já existem ${snap.size} lojas no Firestore.`);
   } catch (err) {
-    console.error('❌ Erro ao ler Firestore:', err.code, err.message);
-    mostrarMensagem('❌ Sem permissão para ler o banco. Confira as regras.', 'erro');
+    mostrarMensagem('❌ Sem permissão para ler o banco.', 'erro');
     return;
   }
 
-  const faltando = LOJAS_FIXAS.filter(l => {
-    const chave = `${l.piso}|${l.luc}|${l.loja}`;
-    return !existentes.has(chave);
-  });
-
-  console.log(`➕ Faltam cadastrar ${faltando.length} lojas.`);
+  const faltando = LOJAS_FIXAS.filter(l => !existentes.has(`${l.piso}|${l.luc}|${l.loja}`));
   if (faltando.length === 0) return;
 
-  mostrarMensagem(`⏳ Cadastrando ${faltando.length} lojas...`);
-
-  let ok = 0, fail = 0;
+  mostrarMensagem(`⏳ Cadastrando ${faltando.length} lojas novas...`);
   for (const loja of faltando) {
     try {
       await addDoc(collection(db, 'lojas'), {
-        piso: loja.piso,
-        luc: loja.luc,
-        loja: loja.loja,
-        nome: '',
-        email: '',
-        telefone: '',
-        criadoEm: new Date().toISOString()
+        piso: loja.piso, luc: loja.luc, loja: loja.loja,
+        nome: '', email: '', telefone: '', criadoEm: new Date().toISOString()
       });
-      ok++;
-    } catch (err) {
-      fail++;
-      console.error('❌ Falha ao cadastrar:', loja.loja, err.code, err.message);
-    }
+    } catch (err) { console.error('Erro ao cadastrar:', loja.loja); }
   }
-
-  console.log(`✅ ${ok} cadastradas · ❌ ${fail} falhas`);
-  if (fail > 0) mostrarMensagem(`⚠️ ${ok} cadastradas, ${fail} falharam.`, 'erro');
 }
 
 async function iniciarLista() {
@@ -129,12 +108,10 @@ async function iniciarLista() {
   await carregarLojas();
 }
 
-// ==================== Carregar lojas ====================
+// ==================== Carregar e Renderizar ====================
 async function carregarLojas() {
   try {
     const snap = await getDocs(collection(db, 'lojas'));
-    console.log(`📥 carregarLojas: recebi ${snap.size} documentos.`);
-
     todasAsLojas = [];
     snap.forEach(docSnap => {
       todasAsLojas.push({ id: docSnap.id, ...docSnap.data() });
@@ -145,17 +122,27 @@ async function carregarLojas() {
       return (a.luc || '').localeCompare(b.luc || '', undefined, { numeric: true });
     });
 
+    atualizarDashboard();
     renderizarTabela();
   } catch (err) {
-    console.error('❌ Erro em carregarLojas:', err.code, err.message);
-    mostrarMensagem('❌ Erro ao carregar lojas: ' + err.message, 'erro');
+    mostrarMensagem('❌ Erro ao carregar lojas.', 'erro');
   }
 }
 
-// ==================== Renderizar tabela ====================
+function atualizarDashboard() {
+  cardTotal.textContent = todasAsLojas.length;
+  
+  let preenchidos = 0;
+  todasAsLojas.forEach(d => {
+    if (d.email || d.telefone) preenchidos++;
+  });
+  
+  cardPreenchidos.textContent = preenchidos;
+  cardPendentes.textContent = todasAsLojas.length - preenchidos;
+}
+
 function renderizarTabela() {
   tabela.innerHTML = '';
-
   const pisoSelecionado = filtroPiso.value;
   const termoBusca = filtroBusca.value.trim().toLowerCase();
 
@@ -169,146 +156,117 @@ function renderizarTabela() {
   });
 
   if (filtradas.length === 0) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="6" style="text-align:center;padding:20px;">
-      Nenhuma loja encontrada.
-    </td>`;
-    tabela.appendChild(tr);
+    tabela.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#808080;">Nenhuma loja encontrada.</td></tr>`;
     return;
   }
 
   filtradas.forEach(d => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td data-label="Piso / LUC / Loja">
-        <strong style="color:#1f4e78;">${d.piso} · LUC ${d.luc}</strong><br>
-        <span style="font-size:15px;">${d.loja}</span>
+      <td data-label="Loja">
+        <div class="nome-loja">${d.loja}</div>
+        <div class="loja-sub">${d.piso} · LUC <strong>${d.luc}</strong></div>
       </td>
-      <td data-label="Nome do Responsável">
-        <input type="text" data-campo="nome" value="${d.nome || ''}"
-               placeholder="Nome completo" autocomplete="name" />
+      <td data-label="Nome">
+        <input type="text" data-campo="nome" value="${d.nome || ''}" placeholder="Nome do responsável" autocomplete="name" />
       </td>
       <td data-label="E-mail">
-        <input type="email" data-campo="email" value="${d.email || ''}"
-               placeholder="email@loja.com" autocomplete="email"
-               inputmode="email" />
+        <input type="email" data-campo="email" value="${d.email || ''}" placeholder="email@loja.com" autocomplete="email" inputmode="email" />
       </td>
       <td data-label="Telefone">
-        <input type="tel" data-campo="telefone" value="${d.telefone || ''}"
-               placeholder="(81) 99999-9999" autocomplete="tel"
-               inputmode="tel" />
+        <input type="tel" data-campo="telefone" value="${d.telefone || ''}" placeholder="(81) 99999-9999" autocomplete="tel" inputmode="tel" />
       </td>
       <td data-label="Ação">
-        <button class="btn-salvar" data-id="${d.id}">💾 Salvar</button>
+        <button class="btn-salvar" data-id="${d.id}">Salvar</button>
         <span class="status-ok" data-status="${d.id}"></span>
       </td>
     `;
     tabela.appendChild(tr);
   });
 
-  // Botões "Salvar"
+  // Adiciona os eventos de salvar e a máscara
   document.querySelectorAll('.btn-salvar').forEach(btn => {
     btn.addEventListener('click', async () => {
-      const id = btn.dataset.id;
-      const tr = btn.closest('tr');
-      const nome = tr.querySelector('[data-campo="nome"]').value.trim();
-      const email = tr.querySelector('[data-campo="email"]').value.trim();
-      const telefone = tr.querySelector('[data-campo="telefone"]').value.trim();
+  const id = btn.dataset.id;
+  const tr = btn.closest('tr');
+  const nome = tr.querySelector('[data-campo="nome"]').value.trim();
+  const email = tr.querySelector('[data-campo="email"]').value.trim();
+  const telefone = tr.querySelector('[data-campo="telefone"]').value.trim();
 
-      try {
-        await setDoc(doc(db, 'lojas', id), { nome, email, telefone }, { merge: true });
+  // 1. Atualizar primeiro o cache local e a interface (não esperar pelo await)
+  const item = todasAsLojas.find(x => x.id === id);
+  if (item) { item.nome = nome; item.email = email; item.telefone = telefone; }
+  atualizarDashboard();
+  
+  const status = document.querySelector(`[data-status="${id}"]`);
+  status.textContent = '✓ salvo';
+  setTimeout(() => { status.textContent = ''; }, 2500);
 
-        const item = todasAsLojas.find(x => x.id === id);
-        if (item) { item.nome = nome; item.email = email; item.telefone = telefone; }
+  // 2. Disparar a escrita (sem await, ou com tratamento de erro separado)
+  try {
+    await setDoc(doc(db, 'lojas', id), { nome, email, telefone }, { merge: true });
+    // Se chegou aqui, significa que o servidor confirmou a escrita (quando online)
+    console.log('Servidor confirmou a escrita:', id);
+  } catch (err) {
+    // Erros offline geralmente não entram aqui; erros de permissão do servidor entram
+    console.error('Erro ao salvar:', err);
+    alert('Falha ao salvar no servidor: ' + err.message);
+  }
+});
+  });
 
-        const status = document.querySelector(`[data-status="${id}"]`);
-        status.textContent = '✓ salvo';
-        setTimeout(() => { status.textContent = ''; }, 2500);
-      } catch (err) {
-        console.error(err);
-        alert('Erro ao salvar: ' + err.message);
-      }
-    });
+  // Aplica a máscara de telefone em todos os campos
+  document.querySelectorAll('input[data-campo="telefone"]').forEach(input => {
+    aplicarMascaraTelefone(input);
   });
 }
 
 filtroPiso.addEventListener('change', renderizarTabela);
 filtroBusca.addEventListener('input', renderizarTabela);
 
-// ==================== Exportar Excel + Enviar e-mail ====================
+// ==================== Máscara de Telefone ====================
+function aplicarMascaraTelefone(input) {
+  input.addEventListener('input', (e) => {
+    let valor = e.target.value.replace(/\D/g, ''); // Remove tudo que não é número
+    
+    if (valor.length > 11) valor = valor.slice(0, 11);
+
+    if (valor.length > 6) {
+      valor = valor.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+    } else if (valor.length > 2) {
+      valor = valor.replace(/^(\d{2})(\d{4,5})/, '($1) $2');
+    } else if (valor.length > 0) {
+      valor = valor.replace(/^(\d*)/, '($1');
+    }
+    
+    e.target.value = valor;
+  });
+}
+
+// ==================== Exportar Excel ====================
 document.getElementById('btnExportar').addEventListener('click', async () => {
-  try {
-    const snap = await getDocs(collection(db, 'lojas'));
-    if (snap.empty) {
-      mostrarMensagem('⚠️ Nenhuma loja encontrada.', 'erro');
-      return;
-    }
-
-    const dados = [];
-    snap.forEach(d => {
-      const v = d.data();
-      dados.push({
-        Piso: v.piso,
-        LUC: v.luc,
-        Loja: v.loja,
-        Nome: v.nome || '(não informado)',
-        Email: v.email || '(não informado)',
-        Telefone: v.telefone || '(não informado)'
-      });
-    });
-
-    dados.sort((a, b) => {
-      if (a.Piso !== b.Piso) return a.Piso.localeCompare(b.Piso);
-      return (a.LUC || '').localeCompare(b.LUC || '', undefined, { numeric: true });
-    });
-
-    const ws = XLSX.utils.json_to_sheet(dados);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Lojas');
-
-    const excelBase64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
-    const nomeArquivo = `lojas_shopping_${new Date().toISOString().slice(0, 10)}.xlsx`;
-
-    XLSX.writeFile(wb, nomeArquivo);
-    mostrarMensagem('⏳ Enviando e-mail...');
-
-    const resposta = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        excelBase64,
-        filename: nomeArquivo,
-        count: dados.length
-      })
-    });
-
-    const texto = await resposta.text();
-    let resultado;
-    try {
-      resultado = JSON.parse(texto);
-    } catch {
-      resultado = { result: 'error', error: texto };
-    }
-
-    if (resultado.result === 'success') {
-      mostrarMensagem(`📧 Excel (${dados.length} lojas) enviado para diego@gmail.com!`);
-    } else {
-      mostrarMensagem('❌ Falha no envio: ' + (resultado.error || 'erro desconhecido'), 'erro');
-    }
-  } catch (err) {
-    console.error(err);
-    mostrarMensagem('❌ Erro: ' + err.message, 'erro');
+  if (todasAsLojas.length === 0) {
+    mostrarMensagem('⚠️ Nenhuma loja para exportar.', 'erro');
+    return;
   }
-});
 
-// ==================== Restaurar lista padrão ====================
-document.getElementById('btnRestaurar').addEventListener('click', async () => {
-  if (!confirm('⚠️ Isso apagará TODAS as lojas do Firestore e recarregará a lista padrão. Continuar?')) return;
+  const dados = todasAsLojas.map(v => ({
+    Piso: v.piso,
+    LUC: v.luc,
+    Loja: v.loja,
+    Nome: v.nome || '(não informado)',
+    Email: v.email || '(não informado)',
+    Telefone: v.telefone || '(não informado)'
+  }));
 
-  const snap = await getDocs(collection(db, 'lojas'));
-  await Promise.all(snap.docs.map(d => deleteDoc(doc(db, 'lojas', d.id))));
+  const ws = XLSX.utils.json_to_sheet(dados);
+  ws['!cols'] = [{ wch: 8 }, { wch: 15 }, { wch: 35 }, { wch: 30 }, { wch: 30 }, { wch: 20 }];
 
-  await garantirLojasNoFirestore();
-  await carregarLojas();
-  mostrarMensagem('🔄 Lista padrão restaurada.');
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Lojas');
+
+  const nomeArquivo = `lojas_tacaruna_${new Date().toISOString().slice(0, 10)}.xlsx`;
+  XLSX.writeFile(wb, nomeArquivo);
+
+  mostrarMensagem(`✅ Arquivo baixado com sucesso!`);
 });

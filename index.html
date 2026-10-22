@@ -2,9 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cadastro de Lojas - Shopping</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Gestão de Contatos - Shopping Tacaruna</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -12,17 +13,28 @@
   <!-- ==================== TELA DE LOGIN ==================== -->
   <div id="telaLogin" class="tela-login">
     <div class="card-login">
-      <h1>🏬 Shopping</h1>
-      <p class="subtitulo">Acesso restrito</p>
+      
+      <img src="https://www.shoppingtacaruna.com.br/assets/images/shopping-tacaruna.svg" alt="Shopping Tacaruna" class="logo-img" />
+      
+      <div class="login-header">
+        <h1>Gestão de Contatos</h1>
+        <span class="badge">Informe de Vendas</span>
+      </div>
+      
+      <p class="subtitulo">Acesse o painel administrativo para continuar</p>
 
-      <form id="formLogin">
-        <label>E-mail</label>
-        <input type="email" id="loginEmail" placeholder="seu@email.com" required autocomplete="username" />
+      <form id="formLogin" class="form-login">
+        <div class="input-group">
+          <label>E-mail</label>
+          <input type="email" id="loginEmail" placeholder="seu@email.com" required autocomplete="username" />
+        </div>
 
-        <label>Senha</label>
-        <input type="password" id="loginSenha" placeholder="••••••••" required autocomplete="current-password" />
+        <div class="input-group">
+          <label>Senha</label>
+          <input type="password" id="loginSenha" placeholder="••••••••" required autocomplete="current-password" />
+        </div>
 
-        <button type="submit">Entrar</button>
+        <button type="submit" class="btn-primary">Entrar no Sistema</button>
       </form>
 
       <div id="msgLogin"></div>
@@ -30,50 +42,86 @@
   </div>
 
   <!-- ==================== APLICAÇÃO ==================== -->
-  <div id="app" class="container" style="display:none;">
-    <header class="topo">
-      <h1>🏬 Cadastro de Lojas do Shopping</h1>
-      <div class="usuario">
-        <span id="usuarioLogado"></span>
-        <button id="btnSair">Sair</button>
+  <div id="app" style="display:none;">
+    
+    <!-- Header Profissional -->
+    <header class="topbar">
+      <div class="topbar-brand">
+        <img src="https://www.shoppingtacaruna.com.br/assets/images/shopping-tacaruna.svg" alt="Logo" class="brand-logo" />
+        <div class="brand-text">
+          <h1>Gestão de Contatos</h1>
+          <span id="usuarioLogado" class="user-email"></span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="btnExportar" class="btn-export">📥 Exportar Excel</button>
+        <button id="btnSair" class="btn-outline">Sair</button>
       </div>
     </header>
 
-    <div class="filtros">
-      <label for="filtroPiso">Filtrar por Piso:</label>
-      <select id="filtroPiso">
-        <option value="">Todos</option>
-        <option value="L1">L1</option>
-        <option value="L2">L2</option>
-        <option value="L3">L3</option>
-        <option value="L4">L4</option>
-      </select>
+    <main class="content">
+      
+      <!-- Dashboard Cards -->
+      <div class="dashboard-cards">
+        <div class="card">
+          <span class="card-title">Total de Lojas</span>
+          <span class="card-value" id="cardTotalLojas">0</span>
+        </div>
+        <div class="card">
+          <span class="card-title">Contatos Pendentes</span>
+          <span class="card-value text-warning" id="cardPendentes">0</span>
+        </div>
+        <div class="card">
+          <span class="card-title">Contatos Preenchidos</span>
+          <span class="card-value text-success" id="cardPreenchidos">0</span>
+        </div>
+      </div>
 
-      <input type="text" id="filtroBusca" placeholder="🔎 Buscar loja ou LUC..." />
-    </div>
+      <!-- Filtros -->
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔎</span>
+          <input type="text" id="filtroBusca" placeholder="Buscar por loja, LUC ou responsável..." />
+        </div>
+        <div class="filter-box">
+          <select id="filtroPiso">
+            <option value="">Todos os Pisos</option>
+            <option value="L1">Piso L1</option>
+            <option value="L2">Piso L2</option>
+            <option value="L3">Piso L3</option>
+            <option value="L4">Piso L4</option>
+          </select>
+        </div>
+      </div>
 
-    <h2>📋 Lojas Cadastradas</h2>
-    <table id="tabelaLojas">
-<thead>
-  <tr>
-    <th>Piso / LUC / Loja</th>
-    <th>Nome</th>
-    <th>E-mail</th>
-    <th>Telefone</th>
-    <th>Ações</th>
-  </tr>
-</thead>
-      <tbody></tbody>
-    </table>
+      <div id="mensagem"></div>
 
-    <div class="acoes">
-      <button id="btnExportar">📊 Exportar Excel e Enviar por E-mail</button>
-      <button id="btnRestaurar">🔄 Restaurar Lista Padrão</button>
-    </div>
-
-    <div id="mensagem"></div>
+      <!-- Tabela -->
+      <div class="table-container">
+        <table id="tabelaLojas">
+          <thead>
+            <tr>
+              <th>Loja / LUC</th>
+              <th>Responsável</th>
+              <th>E-mail</th>
+              <th>Telefone</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+    </main>
   </div>
 
   <script type="module" src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW erro:', err));
+      });
+    }
+  </script>
 </body>
 </html>
