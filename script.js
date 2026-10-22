@@ -159,7 +159,7 @@ function renderizarTabela() {
   }
 
   filtradas.forEach(d => {
-    const funcoes = ['Lojista', 'Supervisor', 'Gerente', 'Vendedor Líder'];
+    const funcoes = ['Lojista', 'Escritório', 'Supervisor', 'Gerente', 'Vendedor Líder'];
     const opcoesFuncao = funcoes.map(f => 
       `<option value="${f}" ${d.funcao === f ? 'selected' : ''}>${f}</option>`
     ).join('');
