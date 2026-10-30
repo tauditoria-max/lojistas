@@ -80,17 +80,15 @@ function mostrarMensagem(texto, tipo = 'sucesso') {
   setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 5000);
 }
 
-// ✅ NOVO: Retorna o status de preenchimento de uma loja
+// ✅ Retorna: 'pendente' (nada preenchido), 'parcial' (falta algo) ou 'completo' (tudo preenchido)
 function obterStatusLoja(d) {
   const campos = ['nome', 'funcao', 'email', 'telefone'];
-  const preenchidos = campos.filter(c => d[c] && d[c].trim() !== ''
-                                       && d[c] !== '(não informado)');
+  const preenchidos = campos.filter(c =>
+    d[c] && d[c].trim() !== '' && d[c] !== '(não informado)'
+  );
 
   if (preenchidos.length === 0) return 'pendente';
-  if (preenchidos.length === campos.length) {
-    const temNaoInformado = campos.some(c => d[c] === '(não informado)');
-    return temNaoInformado ? 'naoinformado' : 'completo';
-  }
+  if (preenchidos.length === campos.length) return 'completo';
   return 'parcial';
 }
 
@@ -154,8 +152,12 @@ function atualizarDashboard() {
   let pendentes = 0, preenchidos = 0;
   todasAsLojas.forEach(d => {
     const status = obterStatusLoja(d);
-    if (status === 'pendente') pendentes++;
-    else if (status === 'completo') preenchidos++;
+    if (status === 'completo') {
+      preenchidos++;
+    } else {
+      // pendente OU parcial → conta como pendente no card
+      pendentes++;
+    }
   });
 
   cardPreenchidos.textContent = preenchidos;
@@ -194,7 +196,8 @@ function renderizarTabela() {
     ).join('');
 
     const tr = document.createElement('tr');
-    tr.innerHTML = `
+tr.classList.add(`status-${obterStatusLoja(d)}`); // ✅ aplica cor conforme status
+tr.innerHTML = `
       <td data-label="Loja">
         <div class="nome-loja">${d.loja}</div>
         <div class="loja-sub">${d.piso} · LUC <strong>${d.luc}</strong></div>
