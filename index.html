@@ -78,21 +78,32 @@
       </div>
 
       <!-- Filtros -->
-      <div class="toolbar">
-        <div class="search-box">
-          <span class="search-icon">🔎</span>
-          <input type="text" id="filtroBusca" placeholder="Buscar por loja, LUC ou responsável..." />
-        </div>
-        <div class="filter-box">
-          <select id="filtroPiso">
-            <option value="">Todos os Pisos</option>
-            <option value="L1">Piso L1</option>
-            <option value="L2">Piso L2</option>
-            <option value="L3">Piso L3</option>
-            <option value="L4">Piso L4</option>
-          </select>
-        </div>
-      </div>
+<div class="toolbar">
+  <div class="search-box">
+    <span class="search-icon">🔎</span>
+    <input type="text" id="filtroBusca" placeholder="Buscar por loja, LUC ou responsável..." />
+  </div>
+  <div class="filter-box">
+    <select id="filtroPiso">
+      <option value="">Todos os Pisos</option>
+      <option value="L1">Piso L1</option>
+      <option value="L2">Piso L2</option>
+      <option value="L3">Piso L3</option>
+      <option value="L4">Piso L4</option>
+    </select>
+  </div>
+  <div class="filter-box">
+    <select id="filtroStatus">
+      <option value="">Todos os Status</option>
+      <option value="pendente">⚠️ Sem informação</option>
+      <option value="parcial">🟡 Parcialmente preenchido</option>
+      <option value="completo">✅ Completo</option>
+    </select>
+  </div>
+  <button id="btnNovaLoja" class="btn-primary" style="width:auto; padding:12px 20px;">
+    ➕ Nova Loja
+  </button>
+</div>
 
       <div id="mensagem"></div>
 
@@ -114,6 +125,37 @@
       </div>
       
     </main>
+  </div>
+
+  <!-- ==================== MODAL NOVA LOJA ==================== -->
+  <div id="modalNovaLoja" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <h2>➕ Nova Loja</h2>
+      <form id="formNovaLoja">
+        <div class="input-group">
+          <label>Piso *</label>
+          <select id="novaPiso" required>
+            <option value="">Selecione...</option>
+            <option value="L1">L1</option>
+            <option value="L2">L2</option>
+            <option value="L3">L3</option>
+            <option value="L4">L4</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>LUC *</label>
+          <input type="text" id="novaLuc" placeholder="Ex: 100AT" required />
+        </div>
+        <div class="input-group">
+          <label>Nome da Loja *</label>
+          <input type="text" id="novaLoja" placeholder="Ex: Lojas Americanas" required />
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btnCancelarNova" class="btn-outline">Cancelar</button>
+          <button type="submit" class="btn-primary" style="width:auto; padding:12px 24px;">Cadastrar</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script type="module" src="script.js"></script>

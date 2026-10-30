@@ -252,3 +252,85 @@ table select.select-funcao {
 }
 #mensagem.sucesso { background: #eaf4fb; color: #1f4e78; border-left: 4px solid #2f75b5; display: block; }
 #mensagem.erro { background: #fdecea; color: #c0392b; border-left: 4px solid #c0392b; display: block; }
+
+/* ==================== MODAL ==================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 30, 50, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.modal-card h2 {
+  margin: 0 0 20px 0;
+  color: #1f4e78;
+  font-size: 20px;
+}
+
+.modal-card select,
+.modal-card input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d5d5d5;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  background: #fafbfc;
+}
+
+.modal-card select:focus,
+.modal-card input:focus {
+  border-color: #2f75b5;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(47,117,181,0.15);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* ==================== BOTÃO EXCLUIR ==================== */
+.btn-excluir {
+  background: #fff;
+  color: #c0392b;
+  border: 1px solid #f0c8c3;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-top: 6px;
+  width: 100%;
+}
+.btn-excluir:hover {
+  background: #fdecea;
+  border-color: #c0392b;
+}
+
+/* ==================== CORES DE STATUS NA LINHA ==================== */
+tr.status-pendente { border-left: 4px solid #e67e22; }
+tr.status-parcial  { border-left: 4px solid #f1c40f; }
+tr.status-completo { border-left: 4px solid #27ae60; }

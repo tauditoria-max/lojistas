@@ -36,6 +36,13 @@ const cardTotal = document.getElementById('cardTotalLojas');
 const cardPendentes = document.getElementById('cardPendentes');
 const cardPreenchidos = document.getElementById('cardPreenchidos');
 
+// ✅ NOVO: Filtro de status e botão Nova Loja
+const filtroStatus = document.getElementById('filtroStatus');
+const btnNovaLoja = document.getElementById('btnNovaLoja');
+const modalNovaLoja = document.getElementById('modalNovaLoja');
+const formNovaLoja = document.getElementById('formNovaLoja');
+const btnCancelarNova = document.getElementById('btnCancelarNova');
+
 let todasAsLojas = [];
 
 // ==================== Login ====================
@@ -71,6 +78,20 @@ function mostrarMensagem(texto, tipo = 'sucesso') {
   msg.textContent = texto;
   msg.className = tipo;
   setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 5000);
+}
+
+// ✅ NOVO: Retorna o status de preenchimento de uma loja
+function obterStatusLoja(d) {
+  const campos = ['nome', 'funcao', 'email', 'telefone'];
+  const preenchidos = campos.filter(c => d[c] && d[c].trim() !== ''
+                                       && d[c] !== '(não informado)');
+
+  if (preenchidos.length === 0) return 'pendente';
+  if (preenchidos.length === campos.length) {
+    const temNaoInformado = campos.some(c => d[c] === '(não informado)');
+    return temNaoInformado ? 'naoinformado' : 'completo';
+  }
+  return 'parcial';
 }
 
 // ==================== Cadastro Inicial ====================
@@ -129,26 +150,34 @@ async function carregarLojas() {
 
 function atualizarDashboard() {
   cardTotal.textContent = todasAsLojas.length;
-  
-  let preenchidos = 0;
+
+  let pendentes = 0, preenchidos = 0;
   todasAsLojas.forEach(d => {
-    if (d.email || d.telefone) preenchidos++;
+    const status = obterStatusLoja(d);
+    if (status === 'pendente') pendentes++;
+    else if (status === 'completo') preenchidos++;
   });
-  
+
   cardPreenchidos.textContent = preenchidos;
-  cardPendentes.textContent = todasAsLojas.length - preenchidos;
+  cardPendentes.textContent = pendentes;
 }
 
 function renderizarTabela() {
   tabela.innerHTML = '';
   const pisoSelecionado = filtroPiso.value;
   const termoBusca = filtroBusca.value.trim().toLowerCase();
+  const statusSelecionado = filtroStatus.value; // ✅ NOVO
 
   const filtradas = todasAsLojas.filter(d => {
     if (pisoSelecionado && d.piso !== pisoSelecionado) return false;
     if (termoBusca) {
       const alvo = `${d.loja} ${d.luc} ${d.nome || ''}`.toLowerCase();
       if (!alvo.includes(termoBusca)) return false;
+    }
+    // ✅ NOVO: filtro por status
+    if (statusSelecionado) {
+      const status = obterStatusLoja(d);
+      if (status !== statusSelecionado) return false;
     }
     return true;
   });
@@ -185,8 +214,9 @@ function renderizarTabela() {
       <td data-label="Telefone">
         <input type="tel" data-campo="telefone" value="${d.telefone || ''}" placeholder="(81) 99999-9999" autocomplete="tel" inputmode="tel" />
       </td>
-      <td data-label="Ação">
+            <td data-label="Ação">
         <button class="btn-salvar" data-id="${d.id}">Salvar</button>
+        <button class="btn-excluir" data-id="${d.id}" title="Excluir loja">🗑️</button>
         <span class="status-ok" data-status="${d.id}"></span>
       </td>
     `;
@@ -221,6 +251,31 @@ function renderizarTabela() {
     });
   });
 
+    // ✅ NOVO: Listener de exclusão
+  document.querySelectorAll('.btn-excluir').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const item = todasAsLojas.find(x => x.id === id);
+      if (!item) return;
+
+      const confirmar = confirm(
+        `Excluir a loja "${item.loja}" (${item.piso} · LUC ${item.luc})?\n\nEsta ação não pode ser desfeita.`
+      );
+      if (!confirmar) return;
+
+      try {
+        await deleteDoc(doc(db, 'lojas', id));
+        todasAsLojas = todasAsLojas.filter(x => x.id !== id);
+        atualizarDashboard();
+        renderizarTabela();
+        mostrarMensagem(`✅ Loja "${item.loja}" excluída.`);
+      } catch (err) {
+        console.error(err);
+        mostrarMensagem('❌ Erro ao excluir loja.', 'erro');
+      }
+    });
+  });
+
   // Aplica a máscara
   document.querySelectorAll('input[data-campo="telefone"]').forEach(input => {
     aplicarMascaraTelefone(input);
@@ -229,6 +284,59 @@ function renderizarTabela() {
 
 filtroPiso.addEventListener('change', renderizarTabela);
 filtroBusca.addEventListener('input', renderizarTabela);
+filtroStatus.addEventListener('change', renderizarTabela); // ✅ NOVO
+
+// ==================== NOVA LOJA (MODAL) ====================
+btnNovaLoja.addEventListener('click', () => {
+  modalNovaLoja.style.display = 'flex';
+  formNovaLoja.reset();
+});
+
+btnCancelarNova.addEventListener('click', () => {
+  modalNovaLoja.style.display = 'none';
+});
+
+// Fecha o modal ao clicar fora do card
+modalNovaLoja.addEventListener('click', (e) => {
+  if (e.target === modalNovaLoja) modalNovaLoja.style.display = 'none';
+});
+
+formNovaLoja.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const piso = document.getElementById('novaPiso').value;
+  const luc = document.getElementById('novaLuc').value.trim();
+  const loja = document.getElementById('novaLoja').value.trim();
+
+  if (!piso || !luc || !loja) {
+    mostrarMensagem('⚠️ Preencha todos os campos.', 'erro');
+    return;
+  }
+
+  const duplicada = todasAsLojas.some(l =>
+    l.piso === piso && l.luc.toLowerCase() === luc.toLowerCase()
+  );
+
+  if (duplicada) {
+    mostrarMensagem('⚠️ Já existe uma loja com esse LUC neste piso.', 'erro');
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'lojas'), {
+      piso, luc, loja,
+      nome: '', funcao: '', email: '', telefone: '',
+      criadoEm: new Date().toISOString()
+    });
+
+    modalNovaLoja.style.display = 'none';
+    mostrarMensagem(`✅ Loja "${loja}" cadastrada com sucesso!`);
+    await carregarLojas();
+  } catch (err) {
+    console.error(err);
+    mostrarMensagem('❌ Erro ao cadastrar loja.', 'erro');
+  }
+});
 
 // ==================== Máscara de Telefone ====================
 function aplicarMascaraTelefone(input) {
