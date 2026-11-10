@@ -191,7 +191,7 @@ export const LOJAS_FIXAS = [
   { piso: 'L4', luc: 'L09-A', loja: 'Milky Moo' },
   { piso: 'L4', luc: 'L09-B', loja: 'Milon' },
   { piso: 'L4', luc: 'L10', loja: 'Natura' },
-  { piso: 'L4', luc: 'L11-A', loja: 'Juliets' },
+  { piso: 'L4', luc: 'L11-A', loja: 'Casa Festê' },
   { piso: 'L4', luc: 'L11B5', loja: 'Atlântico' },
   { piso: 'L4', luc: 'L18/9', loja: 'Ótica Diniz' },
   { piso: 'L4', luc: 'L20/1', loja: 'Oftalmax' },
