@@ -255,7 +255,6 @@ export const LOJAS_FIXAS = [
   { piso: 'L3', luc: 'QE-01', loja: 'MOURA DUBEUX' },
   { piso: 'L3', luc: 'QE-02', loja: 'ROSA SELVAGEM' },
   { piso: 'L3', luc: 'QE-03', loja: 'MORMAII' },
-  { piso: 'L3', luc: 'QE-04', loja: 'PHOENIX ACESSÓRIOS' },
   { piso: 'L3', luc: 'QE-05', loja: 'CACAU SHOW' },
   { piso: 'L3', luc: 'QE-06', loja: 'RIQUEZA BIJOUX' },
   { piso: 'L3', luc: 'QE-09', loja: 'CRABOLANDO' },
